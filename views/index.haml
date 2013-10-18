@@ -12,9 +12,6 @@
     %link{:href => "//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css", :rel => "stylesheet"}/
     %link{:href => "//cdn.jsdelivr.net/codemirror/3.14.0/codemirror.css", :rel => "stylesheet"}/
     :css
-      body {
-        padding-top: 60px;
-      }
       textarea {
         min-height: 400px;
       }
@@ -28,8 +25,26 @@
   %body
     .container
       .row
-        %h1
-          MenuStrap
+        .page-header
+          %h1
+            MenuStrap
+            %small
+              Yaml to Bootstrap 3 Navbar Generator
+      .row
+        .panel.panel-default
+          .panel-heading
+            Instructions
+          .panel-body
+            :markdown
+              Just define the navbar you would like using Yaml and press generate. Below are a list of options you can use in the Yaml:
+
+              * `brand`: The text that you would like to include in the brand area of the nav
+              * `container`: can be `true` or `false`. This determines if the navbar's inner element should be wrapped in a container or not.
+              * `items` and `right_items`: These are the actual items that you would like the navbar to have.
+              * `url`: The url that you would like the nav item to point to
+              * `name`: The text you would like displayed for the nav item
+              * `icon`: The name of the glypicon you would like displayed next to the nav item.
+              * `children`: Sub-items that can have the same parameters as the nav items themselves
       .row
         %h3
           Yaml
