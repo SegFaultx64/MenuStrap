@@ -10,13 +10,16 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     / Le styles
     %link{:href => "//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css", :rel => "stylesheet"}/
+    %link{:href => "//cdn.jsdelivr.net/codemirror/3.14.0/codemirror.css", :rel => "stylesheet"}/
     :css
       body {
         padding-top: 60px;
       }
       textarea {
         min-height: 400px;
-        / Le fav and touch icons
+      }
+      ul.nav li.dropdown:hover > ul.dropdown-menu {
+        display: block;    
       }
     %link{:href => "images/favicon.ico", :rel => "shortcut icon"}/
     %link{:href => "images/apple-touch-icon.png", :rel => "apple-touch-icon"}/
@@ -30,124 +33,87 @@
       .row
         %h3
           Yaml
-        %form{:role => 'form'}
+        %form{:role => 'form', :method => 'POST'}
           .form-group
-            %textarea.form-control{:name => 'yaml'}= @testYaml
+            %textarea#yaml.form-control{:name => 'yaml'}= "" + @yaml
           .form-group
             %button.btn.btn-success{:type => 'submit'}
               Generate
-      .row
+      .row#nav
         %nav.navbar.navbar-default{role: "navigation"}
-          / Brand and toggle get grouped for better mobile display
-          .navbar-header
-            %button.navbar-toggle{"data-target" => ".navbar-ex1-collapse", "data-toggle" => "collapse", type: "button"}
-              %span.sr-only Toggle navigation
-              %span.icon-bar
-              %span.icon-bar
-              %span.icon-bar
-            %a.navbar-brand{href: "#"} #{@brand}
-          / Collect the nav links, forms, and other content for toggling
-          .collapse.navbar-collapse.navbar-ex1-collapse
-            %ul.nav.navbar-nav
-              - @locations.each do |location|
-                %li
-                  %a{href: "#{location['url']}"} #{location['name']}
-              %li
-                %a{href: "#"} Link
-              %li.dropdown
-                %a.dropdown-toggle{"data-toggle" => "dropdown", href: "#"}
-                  Dropdown
-                  %b.caret
-                %ul.dropdown-menu
-                  %li
-                    %a{href: "#"} Action
-                  %li
-                    %a{href: "#"} Another action
-                  %li
-                    %a{href: "#"} Something else here
-                  %li
-                    %a{href: "#"} Separated link
-                  %li
-                    %a{href: "#"} One more separated link
-            %form.navbar-form.navbar-left{role: "search"}
-              .form-group
-                %input.form-control{placeholder: "Search", type: "text"}/
-              %button.btn.btn-default{type: "submit"} Submit
-            %ul.nav.navbar-nav.navbar-right
-              %li
-                %a{href: "#"} Link
-              %li.dropdown
-                %a.dropdown-toggle{"data-toggle" => "dropdown", href: "#"}
-                  Dropdown
-                  %b.caret
-                %ul.dropdown-menu
-                  %li
-                    %a{href: "#"} Action
-                  %li
-                    %a{href: "#"} Another action
-                  %li
-                    %a{href: "#"} Something else here
-                  %li
-                    %a{href: "#"} Separated link
+          - haml_tag_if(@container, :div, :class => 'container') do
+            / Brand and toggle get grouped for better mobile display
+            .navbar-header
+              %button.navbar-toggle{"data-target" => ".navbar-ex1-collapse", "data-toggle" => "collapse", type: "button"}
+                %span.sr-only Toggle navigation
+                %span.icon-bar
+                %span.icon-bar
+                %span.icon-bar
+              %a.navbar-brand{href: "#"} #{@brand}
+            / Collect the nav links, forms, and other content for toggling
+            .collapse.navbar-collapse.navbar-ex1-collapse
+              %ul.nav.navbar-nav
+                - @locations.each do |location|
+                  - if location['children']
+                    %li.dropdown
+                      %a.dropdown-toggle{"data-toggle" => "dropdown", href: "#{location['url']}"} 
+                        - if location['icon']
+                          %i{:class => "glyphicon glyphicon-" + location['icon']}
+                        #{location['name']}
+                        %b.caret
+                      %ul.dropdown-menu
+                        - location['children'].each do |child|
+                          %li
+                            %a{href: "#{child['url']}"} #{child['name']}
+                  - else
+                    %li
+                      %a{href: "#{location['url']}"}
+                        - if location['icon']
+                          %i{:class => "glyphicon glyphicon-" + location['icon']}
+                        #{location['name']}
+              %ul.nav.navbar-nav.navbar-right
+                - @right_locations.each do |location|
+                  - if location['children']
+                    %li.dropdown
+                      %a.dropdown-toggle{"data-toggle" => "dropdown", href: "#{location['url']}"} 
+                        - if location['icon']
+                          %i{:class => "glyphicon glyphicon-" + location['icon']}
+                        #{location['name']}
+                        %b.caret
+                      %ul.dropdown-menu
+                        - location['children'].each do |child|
+                          %li
+                            %a{href: "#{child['url']}"} #{child['name']}
+                  - else
+                    %li
+                      %a{href: "#{location['url']}"}
+                        - if location['icon']
+                          %i{:class => "glyphicon glyphicon-" + location['icon']}
+                        #{location['name']}
       .row
-        %pre
-          = preserve do
-            :escaped
-              <nav class="navbar navbar-default" role="navigation">
+        %textarea#code.form-control
+    %script{:src=>"//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"}
+    %script{:src=>"//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"}
+    %script{:src=>"//cdnjs.cloudflare.com/ajax/libs/codemirror/3.16.0/codemirror.min.js"}
+    %script{:src=>"//cdnjs.cloudflare.com/ajax/libs/codemirror/3.16.0/mode/yaml/yaml.min.js"}
+    %script{:src=>"//cdnjs.cloudflare.com/ajax/libs/codemirror/3.16.0/mode/htmlembedded/htmlmixed.min.js"}
+    :javascript
+      function betterTab(cm) {
+        if (cm.somethingSelected()) {
+          cm.indentSelection("add");
+        } else {
+          cm.replaceSelection(cm.getOption("indentWithTabs")? "\t":
+          Array(cm.getOption("indentUnit") + 1).join(" "), "end", "+input");
+        }
+      }
+      var myCodeMirror = CodeMirror.fromTextArea($('#yaml')[0], {"mode":"yaml", "indentWithTabs": false, "indentUnit": 2, extraKeys: { Tab: betterTab }});
+      $('button').click(function() {
+        myCodeMirror.toTextArea();
+      });
+      $(function () {
+        $('#code').text($('#nav').html());
+        var resultMirror = CodeMirror.fromTextArea($('#code')[0], {"mode":"html", "indentWithTabs": false, "indentUnit": 2});
+      });
 
-
-                <!-- Brand and toggle get grouped for better mobile display -->
-                <div class="navbar-header">
-                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                  </button>
-                  <a class="navbar-brand" href="#">#{@brand}</a>
-                </div>
-
-                <!-- Collect the nav links, forms, and other content for toggling -->
-                <div class="collapse navbar-collapse navbar-ex1-collapse">
-                  <ul class="nav navbar-nav">
-
-            - @locations.each do |location|
-              :escaped
-                      <li>
-                        <a href="#{location['url']}">#{location['name']}</a>
-                      </li>
-            :escaped
-                    <li><a href="#">Link</a></li>
-                        <li class="dropdown">
-                          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                          <ul class="dropdown-menu">
-                            <li><a href="#">Action</a></li>
-                            <li><a href="#">Another action</a></li>
-                            <li><a href="#">Something else here</a></li>
-                            <li><a href="#">Separated link</a></li>
-                            <li><a href="#">One more separated link</a></li>
-                          </ul>
-                        </li>
-                      </ul>
-                      <form class="navbar-form navbar-left" role="search">
-                        <div class="form-group">
-                          <input type="text" class="form-control" placeholder="Search">
-                        </div>
-                        <button type="submit" class="btn btn-default">Submit</button>
-                      </form>
-                      <ul class="nav navbar-nav navbar-right">
-                        <li><a href="#">Link</a></li>
-                        <li class="dropdown">
-                          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                          <ul class="dropdown-menu">
-                            <li><a href="#">Action</a></li>
-                            <li><a href="#">Another action</a></li>
-                            <li><a href="#">Something else here</a></li>
-                            <li><a href="#">Separated link</a></li>
-                          </ul>
-                        </li>
-                      </ul>
-                </div><!-- /.navbar-collapse -->
-              </nav>
 
                    
