@@ -13,10 +13,7 @@
     %link{:href => "//cdn.jsdelivr.net/codemirror/3.14.0/codemirror.css", :rel => "stylesheet"}/
     :css
       textarea {
-        min-height: 400px;
-      }
-      ul.nav li.dropdown:hover > ul.dropdown-menu {
-        display: block;    
+        min-height: 500px;
       }
     %link{:href => "images/favicon.ico", :rel => "shortcut icon"}/
     %link{:href => "images/apple-touch-icon.png", :rel => "apple-touch-icon"}/
@@ -107,6 +104,15 @@
                         #{location['name']}
       .row
         %textarea#code.form-control
+      %footer.row.footer
+        %hr
+        %h4.pull-left
+          ©2013 Max Walker || 
+          %a{:href => "https://twitter.com/intent/user?screen_name=ReluctantHipstr"}
+            @ ReluctantHipstr 
+        %h4.pull-right
+          %a{:href => "http://packettide.com"}
+            Packet Tide
     %script{:src=>"//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"}
     %script{:src=>"//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"}
     %script{:src=>"//cdnjs.cloudflare.com/ajax/libs/codemirror/3.16.0/codemirror.min.js"}
